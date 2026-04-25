@@ -157,9 +157,7 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
         )
         return data
 
-    def _sum_all(
-        self, lines: list[UtilityLine], fixed: list[FixedCost]
-    ) -> float:
+    def _sum_all(self, lines: list[UtilityLine], fixed: list[FixedCost]) -> float:
         total = sum(line.cost for line in lines) + sum(f.amount for f in fixed)
         return round(total, 2)
 
@@ -202,9 +200,7 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
             if mode not in (BILLING_PREPAID, BILLING_POSTPAID):
                 mode = DEFAULT_BILLING_MODE
             covered = (
-                _next_month(report_month)
-                if mode == BILLING_PREPAID
-                else report_month
+                _next_month(report_month) if mode == BILLING_PREPAID else report_month
             )
             result.append(
                 FixedCost(
@@ -228,9 +224,7 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
                 {
                     "month": month.strftime("%Y-%m"),
                     "total": total,
-                    "utilities_total": round(
-                        sum(line.cost for line in lines), 2
-                    ),
+                    "utilities_total": round(sum(line.cost for line in lines), 2),
                     "fixed_total": round(sum(f.amount for f in fixed), 2),
                 }
             )
@@ -256,7 +250,11 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
                 "previous_month": prev.strftime("%Y-%m"),
                 "previous_total": prev_total,
                 "diff": diff,
-                "direction": "saved" if diff < 0 else "spent_more" if diff > 0 else "equal",
+                "direction": "saved"
+                if diff < 0
+                else "spent_more"
+                if diff > 0
+                else "equal",
             }
 
         return {

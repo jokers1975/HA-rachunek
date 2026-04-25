@@ -36,7 +36,7 @@ COST_AMOUNT = "amount"
 COST_BILLING_MODE = "billing_mode"
 
 # Billing modes for fixed costs
-BILLING_PREPAID = "prepaid"   # paid in advance — period labelled with the NEXT month
+BILLING_PREPAID = "prepaid"  # paid in advance — period labelled with the NEXT month
 BILLING_POSTPAID = "postpaid"  # paid in arrears — labelled with the report month
 BILLING_MODES = [BILLING_POSTPAID, BILLING_PREPAID]
 

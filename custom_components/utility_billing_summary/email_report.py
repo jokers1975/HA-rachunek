@@ -154,7 +154,13 @@ def render_report_html(report: dict[str, Any]) -> str:
     if comparison:
         sentence = _comparison_sentence(comparison, currency)
         direction = comparison.get("direction", "equal")
-        cls = "saved" if direction == "saved" else "spent" if direction == "spent_more" else "equal"
+        cls = (
+            "saved"
+            if direction == "saved"
+            else "spent"
+            if direction == "spent_more"
+            else "equal"
+        )
         comparison_html = f"""
         <div class="comparison {cls}">
           <div class="cmp-title">Porównanie z poprzednim miesiącem</div>
