@@ -1,0 +1,159 @@
+{
+  "title": "Rachunki za media",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfiguracja Utility Bill Summary",
+        "description": "Podaj nazwę instancji i dane serwera SMTP. Po zatwierdzeniu dodaj encje i stawki w sekcji „Konfiguruj”.",
+        "data": {
+          "title": "Nazwa instancji",
+          "smtp_host": "Host SMTP",
+          "smtp_port": "Port SMTP",
+          "smtp_user": "Użytkownik SMTP",
+          "smtp_password": "Hasło SMTP",
+          "smtp_tls": "Użyj TLS/STARTTLS",
+          "smtp_sender": "Adres nadawcy"
+        }
+      }
+    },
+    "error": {
+      "invalid_smtp": "Nie można połączyć się z serwerem SMTP."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Utility Bill Summary",
+        "menu_options": {
+          "utilities_menu": "Encje i stawki",
+          "fixed_costs_menu": "Stałe koszty miesięczne",
+          "recipients": "Odbiorcy raportu",
+          "smtp": "Ustawienia SMTP",
+          "preferences": "Preferencje",
+          "save": "Zapisz i zamknij"
+        }
+      },
+      "utilities_menu": {
+        "title": "Encje i stawki",
+        "menu_options": {
+          "utility_add": "Dodaj encję",
+          "utility_remove": "Usuń encję",
+          "init": "Wstecz"
+        }
+      },
+      "utility_add": {
+        "title": "Dodaj encję",
+        "data": {
+          "entity_id": "Czujnik zużycia",
+          "name": "Nazwa (np. Prąd)",
+          "rate": "Stawka za jednostkę",
+          "unit": "Jednostka (kWh, m³, GJ...)",
+          "category": "Kategoria"
+        }
+      },
+      "utility_remove": {
+        "title": "Usuń encję",
+        "data": {
+          "index": "Wybierz pozycję do usunięcia"
+        }
+      },
+      "fixed_costs_menu": {
+        "title": "Stałe koszty",
+        "menu_options": {
+          "fixed_add": "Dodaj koszt",
+          "fixed_remove": "Usuń koszt",
+          "init": "Wstecz"
+        }
+      },
+      "fixed_add": {
+        "title": "Dodaj koszt stały",
+        "data": {
+          "name": "Nazwa (np. abonament internet)",
+          "amount": "Kwota miesięczna"
+        }
+      },
+      "fixed_remove": {
+        "title": "Usuń koszt stały",
+        "data": {
+          "index": "Wybierz pozycję do usunięcia"
+        }
+      },
+      "recipients": {
+        "title": "Odbiorcy raportu",
+        "description": "Adresy oddzielone przecinkami.",
+        "data": {
+          "recipients": "Lista e-mail"
+        }
+      },
+      "smtp": {
+        "title": "Ustawienia SMTP",
+        "data": {
+          "title": "Nazwa instancji",
+          "smtp_host": "Host SMTP",
+          "smtp_port": "Port SMTP",
+          "smtp_user": "Użytkownik SMTP",
+          "smtp_password": "Hasło SMTP",
+          "smtp_tls": "Użyj TLS/STARTTLS",
+          "smtp_sender": "Adres nadawcy"
+        }
+      },
+      "preferences": {
+        "title": "Preferencje",
+        "data": {
+          "currency": "Waluta",
+          "auto_send": "Automatyczna wysyłka 1. dnia miesiąca o 09:00"
+        }
+      }
+    }
+  },
+  "selector": {
+    "utility_category": {
+      "options": {
+        "electricity": "Prąd",
+        "gas": "Gaz",
+        "water": "Woda",
+        "heating": "Ogrzewanie",
+        "other": "Inne"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "month_total": {
+        "name": "Rachunek miesięczny"
+      },
+      "last_month_total": {
+        "name": "Rachunek z poprzedniego miesiąca"
+      },
+      "year_total": {
+        "name": "Rachunek roczny"
+      }
+    }
+  },
+  "services": {
+    "send_monthly_report": {
+      "name": "Wyślij raport miesięczny",
+      "description": "Generuje rachunek HTML i wysyła go e-mailem.",
+      "fields": {
+        "recipients": {
+          "name": "Odbiorcy",
+          "description": "Opcjonalna lista adresów e-mail."
+        },
+        "month": {
+          "name": "Miesiąc",
+          "description": "Miesiąc w formacie YYYY-MM."
+        }
+      }
+    },
+    "generate_preview": {
+      "name": "Podgląd raportu",
+      "description": "Zwraca HTML raportu bez wysyłki.",
+      "fields": {
+        "month": {
+          "name": "Miesiąc",
+          "description": "Miesiąc w formacie YYYY-MM."
+        }
+      }
+    }
+  }
+}

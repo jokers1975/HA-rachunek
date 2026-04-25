@@ -1,0 +1,135 @@
+{
+  "title": "Utility Bill Summary",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Utility Bill Summary setup",
+        "description": "Enter an instance title and SMTP credentials. Add utility sensors and tariffs later via \"Configure\".",
+        "data": {
+          "title": "Instance title",
+          "smtp_host": "SMTP host",
+          "smtp_port": "SMTP port",
+          "smtp_user": "SMTP username",
+          "smtp_password": "SMTP password",
+          "smtp_tls": "Use TLS/STARTTLS",
+          "smtp_sender": "Sender address"
+        }
+      }
+    },
+    "error": {
+      "invalid_smtp": "Unable to connect to the SMTP server."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Utility Bill Summary",
+        "menu_options": {
+          "utilities_menu": "Utilities & tariffs",
+          "fixed_costs_menu": "Fixed monthly costs",
+          "recipients": "Report recipients",
+          "smtp": "SMTP settings",
+          "preferences": "Preferences",
+          "save": "Save and close"
+        }
+      },
+      "utilities_menu": {
+        "title": "Utilities & tariffs",
+        "menu_options": {
+          "utility_add": "Add utility",
+          "utility_remove": "Remove utility",
+          "init": "Back"
+        }
+      },
+      "utility_add": {
+        "title": "Add utility",
+        "data": {
+          "entity_id": "Consumption sensor",
+          "name": "Name",
+          "rate": "Rate per unit",
+          "unit": "Unit (kWh, m³, GJ...)",
+          "category": "Category"
+        }
+      },
+      "utility_remove": {
+        "title": "Remove utility",
+        "data": {"index": "Choose the row to remove"}
+      },
+      "fixed_costs_menu": {
+        "title": "Fixed costs",
+        "menu_options": {
+          "fixed_add": "Add cost",
+          "fixed_remove": "Remove cost",
+          "init": "Back"
+        }
+      },
+      "fixed_add": {
+        "title": "Add fixed cost",
+        "data": {"name": "Name", "amount": "Monthly amount"}
+      },
+      "fixed_remove": {
+        "title": "Remove fixed cost",
+        "data": {"index": "Choose the row to remove"}
+      },
+      "recipients": {
+        "title": "Report recipients",
+        "description": "Comma-separated addresses.",
+        "data": {"recipients": "Email list"}
+      },
+      "smtp": {
+        "title": "SMTP settings",
+        "data": {
+          "title": "Instance title",
+          "smtp_host": "SMTP host",
+          "smtp_port": "SMTP port",
+          "smtp_user": "SMTP username",
+          "smtp_password": "SMTP password",
+          "smtp_tls": "Use TLS/STARTTLS",
+          "smtp_sender": "Sender address"
+        }
+      },
+      "preferences": {
+        "title": "Preferences",
+        "data": {
+          "currency": "Currency",
+          "auto_send": "Auto-send on the 1st at 09:00"
+        }
+      }
+    }
+  },
+  "selector": {
+    "utility_category": {
+      "options": {
+        "electricity": "Electricity",
+        "gas": "Gas",
+        "water": "Water",
+        "heating": "Heating",
+        "other": "Other"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "month_total": {"name": "Monthly bill"},
+      "last_month_total": {"name": "Previous month bill"},
+      "year_total": {"name": "Yearly bill"}
+    }
+  },
+  "services": {
+    "send_monthly_report": {
+      "name": "Send monthly report",
+      "description": "Generates an HTML invoice and sends it by email.",
+      "fields": {
+        "recipients": {"name": "Recipients", "description": "Optional list of email addresses."},
+        "month": {"name": "Month", "description": "Month as YYYY-MM."}
+      }
+    },
+    "generate_preview": {
+      "name": "Generate preview",
+      "description": "Returns the report HTML without sending.",
+      "fields": {
+        "month": {"name": "Month", "description": "Month as YYYY-MM."}
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+send_monthly_report:
+  name: Wyślij raport miesięczny
+  description: Generuje rachunek HTML i wysyła go e-mailem do skonfigurowanych odbiorców.
+  fields:
+    recipients:
+      name: Odbiorcy
+      description: Opcjonalna lista adresów e-mail. Gdy pusta, używana jest domyślna konfiguracja.
+      required: false
+      example: "['biuro@example.com']"
+      selector:
+        object:
+    month:
+      name: Miesiąc
+      description: Miesiąc w formacie YYYY-MM. Domyślnie — poprzedni pełny miesiąc.
+      required: false
+      example: "2026-03"
+      selector:
+        text:
+
+generate_preview:
+  name: Podgląd raportu (HTML)
+  description: Zwraca HTML wygenerowanego raportu bez wysyłki e-mailem. Użyteczne do testów.
+  fields:
+    month:
+      name: Miesiąc
+      description: Miesiąc w formacie YYYY-MM. Domyślnie — poprzedni pełny miesiąc.
+      required: false
+      example: "2026-03"
+      selector:
+        text:
