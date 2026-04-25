@@ -137,9 +137,10 @@ class UtilityCostSensor(_BaseBillSensor):
         row: dict[str, Any],
     ) -> None:
         super().__init__(coordinator, entry)
-        self._row_entity = row[UTIL_ENTITY_ID]
-        self._attr_name = row.get(UTIL_NAME) or row[UTIL_ENTITY_ID]
-        self._attr_unique_id = f"{entry.entry_id}_{row[UTIL_ENTITY_ID]}"
+        # Row key: prefer manual entity_id, fall back to energy stat_energy_from.
+        self._row_entity = row.get(UTIL_ENTITY_ID) or row.get("stat_energy_from") or ""
+        self._attr_name = row.get(UTIL_NAME) or self._row_entity
+        self._attr_unique_id = f"{entry.entry_id}_{self._row_entity}"
 
     @property
     def native_value(self) -> float | None:
@@ -163,6 +164,7 @@ class UtilityCostSensor(_BaseBillSensor):
                     "unit": line.unit,
                     "rate": line.rate,
                     "category": line.category,
+                    "source": line.source,
                     "source_entity": line.entity_id,
                     "period_start": line.period_start,
                     "period_end": line.period_end,

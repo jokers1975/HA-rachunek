@@ -21,6 +21,9 @@
     }
   },
   "options": {
+    "abort": {
+      "no_energy_sources": "Brak źródeł w Energy Dashboard z przypisaną ceną. Skonfiguruj prąd/gaz/wodę w Energy Dashboard i wróć tutaj."
+    },
     "step": {
       "init": {
         "title": "Utility Bill Summary",
@@ -36,19 +39,30 @@
       "utilities_menu": {
         "title": "Encje i stawki",
         "menu_options": {
-          "utility_add": "Dodaj encję",
+          "utility_add_energy": "Dodaj z Energy Dashboard",
+          "utility_add": "Dodaj ręcznie (własna stawka)",
           "utility_remove": "Usuń encję",
           "init": "Wstecz"
         }
       },
       "utility_add": {
-        "title": "Dodaj encję",
+        "title": "Dodaj encję (ręcznie)",
         "data": {
           "entity_id": "Czujnik zużycia",
           "name": "Nazwa (np. Prąd)",
           "rate": "Stawka za jednostkę",
           "unit": "Jednostka (kWh, m³, GJ...)",
           "category": "Kategoria"
+        }
+      },
+      "utility_add_energy": {
+        "title": "Dodaj z Energy Dashboard",
+        "description": "Wybierz źródło z Energy Dashboard. Koszt i zużycie będą czytane wprost ze statystyk HA — bez wpisywania stawki.",
+        "data": {
+          "source_index": "Źródło",
+          "name": "Nazwa (opcjonalnie)",
+          "category": "Kategoria",
+          "unit": "Jednostka"
         }
       },
       "utility_remove": {

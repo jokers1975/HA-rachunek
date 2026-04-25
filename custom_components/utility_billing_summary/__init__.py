@@ -33,6 +33,7 @@ from .const import (
 )
 from .coordinator import UtilityBillCoordinator
 from .email_report import async_send_report, render_report_html
+from .energy import async_register_prefs_listener
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,6 +80,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass, _scheduled_check, hour=REPORT_HOUR, minute=REPORT_MINUTE, second=0
     )
     hass.data[DOMAIN][entry.entry_id]["unsub_schedule"] = unsub
+
+    async def _on_energy_prefs_changed() -> None:
+        await coordinator.async_request_refresh()
+
+    await async_register_prefs_listener(hass, _on_energy_prefs_changed)
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True

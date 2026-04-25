@@ -114,15 +114,24 @@ def render_report_html(report: dict[str, Any]) -> str:
         report.get("month", date.today().isoformat())[:10], "%Y-%m-%d"
     ).strftime("%Y%m")
 
+    def _rate_cell(line: dict[str, Any]) -> str:
+        rate = line.get("rate")
+        if rate is None:
+            return "—"
+        return _fmt_money(float(rate), currency)
+
+    def _source_mark(line: dict[str, Any]) -> str:
+        return " 🔌" if line.get("source") == "energy" else ""
+
     lines_html = "".join(
         f"""
         <tr>
           <td>
-            <div class="name">{escape(str(line.get("name", "")))}</div>
+            <div class="name">{escape(str(line.get("name", "")))}{_source_mark(line)}</div>
             <div class="period">okres: {escape(_fmt_period_range(line.get("period_start", ""), line.get("period_end", "")))}</div>
           </td>
           <td class="num">{line.get("consumption", 0):.2f} {escape(str(line.get("unit", "")))}</td>
-          <td class="num">{_fmt_money(float(line.get("rate", 0)), currency)}</td>
+          <td class="num">{_rate_cell(line)}</td>
           <td class="num strong">{_fmt_money(float(line.get("cost", 0)), currency)}</td>
         </tr>
         """

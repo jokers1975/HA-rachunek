@@ -109,6 +109,43 @@ async def _try_state_fallback(
     return max(delta, 0.0)
 
 
+async def async_monthly_stat_change(
+    hass: HomeAssistant,
+    statistic_id: str,
+    month: date,
+) -> float | None:
+    """Return monthly ``change`` for an arbitrary statistic id.
+
+    Used for Energy Dashboard cost/consumption statistics — no state fallback,
+    because the statistic may belong to a hidden entity or an external source.
+    Returns ``None`` when the statistic has no data for that month.
+    """
+    if not statistic_id:
+        return None
+    start, end = _month_bounds(month)
+    recorder = get_instance(hass)
+    try:
+        stats: dict[str, list[dict[str, Any]]] = await recorder.async_add_executor_job(
+            statistics_during_period,
+            hass,
+            start,
+            end,
+            {statistic_id},
+            "month",
+            None,
+            {"change"},
+        )
+    except Exception as err:  # noqa: BLE001
+        _LOGGER.debug("Statistics query failed for %s: %s", statistic_id, err)
+        return None
+
+    rows = stats.get(statistic_id) or []
+    if not rows:
+        return None
+    change = rows[0].get("change")
+    return None if change is None else float(change)
+
+
 async def async_reset_snapshot(hass: HomeAssistant, entry_id: str, month: date) -> None:
     """Clear the fallback baseline for a new month."""
     store: Store[dict[str, dict[str, float]]] = Store(

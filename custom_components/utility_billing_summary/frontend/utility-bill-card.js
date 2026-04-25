@@ -5,7 +5,7 @@
  * a 12-month bar chart.
  */
 
-const CARD_VERSION = "0.2.0";
+const CARD_VERSION = "0.3.0";
 
 const CATEGORY_ICONS = {
   electricity: "⚡",
@@ -115,15 +115,21 @@ class UtilityBillCard extends HTMLElement {
     const lineRows = (viewData.lines || []).map((line) => {
       const icon = CATEGORY_ICONS[line.category] || CATEGORY_ICONS.other;
       const cons = Number(line.consumption || 0).toFixed(2);
-      const rate = Number(line.rate || 0).toFixed(4);
+      const hasRate = line.rate !== null && line.rate !== undefined;
+      const rateCell = hasRate
+        ? `${Number(line.rate).toFixed(4)} ${currency}`
+        : `—`;
+      const sourceMark = line.source === "energy"
+        ? `<span class="src" title="Z Energy Dashboard">🔌</span>`
+        : "";
       return `
         <tr>
           <td>
-            <div class="name"><span class="cat">${icon}</span>${line.name || ""}</div>
+            <div class="name"><span class="cat">${icon}</span>${line.name || ""}${sourceMark}</div>
             <div class="period">okres: ${fmtPeriodRange(line.period_start, line.period_end)}</div>
           </td>
           <td class="num">${cons} ${line.unit || ""}</td>
-          <td class="num">${rate} ${currency}</td>
+          <td class="num">${rateCell}</td>
           <td class="num strong">${fmtMoney(line.cost, currency)}</td>
         </tr>`;
     }).join("");
@@ -177,6 +183,7 @@ class UtilityBillCard extends HTMLElement {
           .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
           .strong { font-weight: 600; }
           .cat { display: inline-block; margin-right: 6px; }
+          .src { margin-left: 6px; opacity: 0.7; font-size: 11px; cursor: help; }
           .name { font-weight: 500; }
           .period { font-size: 11px; color: var(--secondary-text-color, #8a7f55); margin-top: 2px; }
           .total { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px;

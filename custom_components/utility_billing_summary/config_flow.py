@@ -51,12 +51,18 @@ from .const import (
     OPT_FIXED_COSTS,
     OPT_RECIPIENTS,
     OPT_UTILITIES,
+    SOURCE_ENERGY,
+    SOURCE_MANUAL,
     UTIL_CATEGORY,
     UTIL_ENTITY_ID,
     UTIL_NAME,
     UTIL_RATE,
+    UTIL_SOURCE,
+    UTIL_STAT_COST,
+    UTIL_STAT_ENERGY_FROM,
     UTIL_UNIT,
 )
+from .energy import async_available_sources
 
 
 def _smtp_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
@@ -121,6 +127,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
         self._entry = entry
         self._working: dict[str, Any] = dict(entry.options)
         self._edit_index: int | None = None
+        self._energy_sources: list[dict[str, Any]] = []
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -143,7 +150,12 @@ class UtilityBillOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         return self.async_show_menu(
             step_id="utilities_menu",
-            menu_options=["utility_add", "utility_remove", "init"],
+            menu_options=[
+                "utility_add_energy",
+                "utility_add",
+                "utility_remove",
+                "init",
+            ],
         )
 
     async def async_step_utility_add(
@@ -153,6 +165,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
             utilities = list(self._working.get(OPT_UTILITIES, []))
             utilities.append(
                 {
+                    UTIL_SOURCE: SOURCE_MANUAL,
                     UTIL_ENTITY_ID: user_input[UTIL_ENTITY_ID],
                     UTIL_NAME: user_input[UTIL_NAME],
                     UTIL_RATE: float(user_input[UTIL_RATE]),
@@ -185,6 +198,62 @@ class UtilityBillOptionsFlow(OptionsFlow):
             }
         )
         return self.async_show_form(step_id="utility_add", data_schema=schema)
+
+    async def async_step_utility_add_energy(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Add a utility row sourced from HA Energy Dashboard."""
+        if not self._energy_sources:
+            self._energy_sources = await async_available_sources(self.hass)
+
+        if not self._energy_sources:
+            return self.async_abort(reason="no_energy_sources")
+
+        if user_input is not None:
+            idx = int(user_input["source_index"])
+            if 0 <= idx < len(self._energy_sources):
+                src = self._energy_sources[idx]
+                utilities = list(self._working.get(OPT_UTILITIES, []))
+                utilities.append(
+                    {
+                        UTIL_SOURCE: SOURCE_ENERGY,
+                        UTIL_NAME: user_input.get(UTIL_NAME) or src["name"],
+                        UTIL_CATEGORY: user_input.get(UTIL_CATEGORY, src["category"]),
+                        UTIL_UNIT: user_input.get(UTIL_UNIT, src["unit"]),
+                        UTIL_STAT_ENERGY_FROM: src["stat_energy_from"],
+                        UTIL_STAT_COST: src["stat_cost"],
+                    }
+                )
+                self._working[OPT_UTILITIES] = utilities
+            return await self.async_step_init()
+
+        options = [
+            {
+                "value": str(i),
+                "label": f"{src['name']} ({src['category']})",
+            }
+            for i, src in enumerate(self._energy_sources)
+        ]
+        first = self._energy_sources[0]
+        schema = vol.Schema(
+            {
+                vol.Required("source_index", default="0"): SelectSelector(
+                    SelectSelectorConfig(
+                        options=options, mode=SelectSelectorMode.DROPDOWN
+                    )
+                ),
+                vol.Optional(UTIL_NAME, default=first["name"]): str,
+                vol.Required(UTIL_CATEGORY, default=first["category"]): SelectSelector(
+                    SelectSelectorConfig(
+                        options=CATEGORIES,
+                        mode=SelectSelectorMode.DROPDOWN,
+                        translation_key="utility_category",
+                    )
+                ),
+                vol.Required(UTIL_UNIT, default=first["unit"]): str,
+            }
+        )
+        return self.async_show_form(step_id="utility_add_energy", data_schema=schema)
 
     async def async_step_utility_remove(
         self, user_input: dict[str, Any] | None = None

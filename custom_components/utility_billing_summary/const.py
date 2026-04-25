@@ -29,6 +29,13 @@ UTIL_NAME = "name"
 UTIL_RATE = "rate"
 UTIL_UNIT = "unit"
 UTIL_CATEGORY = "category"
+UTIL_SOURCE = "source"
+UTIL_STAT_ENERGY_FROM = "stat_energy_from"
+UTIL_STAT_COST = "stat_cost"
+
+# Data source modes for utility rows
+SOURCE_MANUAL = "manual"  # user provides rate; coordinator does consumption × rate
+SOURCE_ENERGY = "energy"  # read cost from HA Energy Dashboard statistics
 
 # Per-fixed-cost row keys
 COST_NAME = "name"

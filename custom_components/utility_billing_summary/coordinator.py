@@ -26,14 +26,19 @@ from .const import (
     OPT_CURRENCY,
     OPT_FIXED_COSTS,
     OPT_UTILITIES,
+    SOURCE_ENERGY,
+    SOURCE_MANUAL,
     UPDATE_INTERVAL_HOURS,
     UTIL_CATEGORY,
     UTIL_ENTITY_ID,
     UTIL_NAME,
     UTIL_RATE,
+    UTIL_SOURCE,
+    UTIL_STAT_COST,
+    UTIL_STAT_ENERGY_FROM,
     UTIL_UNIT,
 )
-from .statistics import async_monthly_sum
+from .statistics import async_monthly_stat_change, async_monthly_sum
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,11 +51,12 @@ class UtilityLine:
     name: str
     category: str
     unit: str
-    rate: float
+    rate: float | None
     consumption: float
     cost: float
     period_start: str  # ISO date
     period_end: str  # ISO date (inclusive last day)
+    source: str = SOURCE_MANUAL  # "manual" | "energy"
 
 
 @dataclass
@@ -165,28 +171,73 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
         period_start, period_end = _month_period(month)
         lines: list[UtilityLine] = []
         for row in self.utilities:
-            entity_id = row.get(UTIL_ENTITY_ID)
-            if not entity_id:
-                continue
-            rate = float(row.get(UTIL_RATE, 0.0))
-            consumption = await async_monthly_sum(
-                self.hass, entity_id, month, self.entry.entry_id
-            )
-            consumption = consumption or 0.0
-            lines.append(
-                UtilityLine(
-                    entity_id=entity_id,
-                    name=row.get(UTIL_NAME) or entity_id,
-                    category=row.get(UTIL_CATEGORY, "other"),
-                    unit=row.get(UTIL_UNIT, ""),
-                    rate=rate,
-                    consumption=consumption,
-                    cost=round(consumption * rate, 2),
-                    period_start=period_start,
-                    period_end=period_end,
+            source = row.get(UTIL_SOURCE, SOURCE_MANUAL)
+            if source == SOURCE_ENERGY:
+                line = await self._collect_energy_line(
+                    row, month, period_start, period_end
                 )
-            )
+            else:
+                line = await self._collect_manual_line(
+                    row, month, period_start, period_end
+                )
+            if line is not None:
+                lines.append(line)
         return lines
+
+    async def _collect_manual_line(
+        self, row: dict[str, Any], month: date, period_start: str, period_end: str
+    ) -> UtilityLine | None:
+        entity_id = row.get(UTIL_ENTITY_ID)
+        if not entity_id:
+            return None
+        rate = float(row.get(UTIL_RATE, 0.0))
+        consumption = await async_monthly_sum(
+            self.hass, entity_id, month, self.entry.entry_id
+        )
+        consumption = consumption or 0.0
+        return UtilityLine(
+            entity_id=entity_id,
+            name=row.get(UTIL_NAME) or entity_id,
+            category=row.get(UTIL_CATEGORY, "other"),
+            unit=row.get(UTIL_UNIT, ""),
+            rate=rate,
+            consumption=consumption,
+            cost=round(consumption * rate, 2),
+            period_start=period_start,
+            period_end=period_end,
+            source=SOURCE_MANUAL,
+        )
+
+    async def _collect_energy_line(
+        self, row: dict[str, Any], month: date, period_start: str, period_end: str
+    ) -> UtilityLine | None:
+        stat_energy = row.get(UTIL_STAT_ENERGY_FROM)
+        stat_cost = row.get(UTIL_STAT_COST) or (
+            f"{stat_energy}_cost" if stat_energy else None
+        )
+        if not stat_cost:
+            return None
+        cost = await async_monthly_stat_change(self.hass, stat_cost, month)
+        consumption = (
+            await async_monthly_stat_change(self.hass, stat_energy, month)
+            if stat_energy
+            else None
+        )
+        cost = 0.0 if cost is None else float(cost)
+        consumption = 0.0 if consumption is None else float(consumption)
+        rate: float | None = round(cost / consumption, 4) if consumption > 0 else None
+        return UtilityLine(
+            entity_id=stat_energy or stat_cost,
+            name=row.get(UTIL_NAME) or stat_energy or stat_cost,
+            category=row.get(UTIL_CATEGORY, "other"),
+            unit=row.get(UTIL_UNIT, ""),
+            rate=rate,
+            consumption=consumption,
+            cost=round(cost, 2),
+            period_start=period_start,
+            period_end=period_end,
+            source=SOURCE_ENERGY,
+        )
 
     def _fixed_costs_for(self, report_month: date) -> list[FixedCost]:
         """Return fixed-cost rows stamped with the period they cover.

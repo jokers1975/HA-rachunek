@@ -21,6 +21,9 @@
     }
   },
   "options": {
+    "abort": {
+      "no_energy_sources": "No priced sources in the Energy Dashboard. Configure electricity/gas/water there first, then come back."
+    },
     "step": {
       "init": {
         "title": "Utility Bill Summary",
@@ -36,19 +39,30 @@
       "utilities_menu": {
         "title": "Utilities & tariffs",
         "menu_options": {
-          "utility_add": "Add utility",
+          "utility_add_energy": "Add from Energy Dashboard",
+          "utility_add": "Add manually (custom rate)",
           "utility_remove": "Remove utility",
           "init": "Back"
         }
       },
       "utility_add": {
-        "title": "Add utility",
+        "title": "Add utility (manual)",
         "data": {
           "entity_id": "Consumption sensor",
           "name": "Name",
           "rate": "Rate per unit",
           "unit": "Unit (kWh, m³, GJ...)",
           "category": "Category"
+        }
+      },
+      "utility_add_energy": {
+        "title": "Add from Energy Dashboard",
+        "description": "Pick a source from the Energy Dashboard. Cost and consumption are read directly from HA statistics — no tariff needed.",
+        "data": {
+          "source_index": "Source",
+          "name": "Name (optional)",
+          "category": "Category",
+          "unit": "Unit"
         }
       },
       "utility_remove": {
