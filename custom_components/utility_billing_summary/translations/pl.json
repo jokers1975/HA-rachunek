@@ -22,26 +22,32 @@
   },
   "options": {
     "abort": {
-      "no_energy_sources": "Brak źródeł w Energy Dashboard z przypisaną ceną. Skonfiguruj prąd/gaz/wodę w Energy Dashboard i wróć tutaj."
+      "no_energy_sources": "Brak źródeł w Energy Dashboard z przypisaną ceną. Skonfiguruj prąd/gaz/wodę w Energy Dashboard i wróć tutaj.",
+      "no_recipients": "Brak skonfigurowanych odbiorców. Dodaj adresy w sekcji „Odbiorcy raportu” i spróbuj ponownie.",
+      "test_sent": "Wiadomość testowa została wysłana.",
+      "send_failed": "Nie udało się wysłać wiadomości testowej. Sprawdź logi Home Assistant oraz ustawienia SMTP."
     },
     "step": {
       "init": {
         "title": "Utility Bill Summary",
+        "description": "Stan konfiguracji: {summary}",
         "menu_options": {
           "utilities_menu": "Encje i stawki",
           "fixed_costs_menu": "Stałe koszty miesięczne",
           "recipients": "Odbiorcy raportu",
           "smtp": "Ustawienia SMTP",
           "preferences": "Preferencje",
+          "send_test": "Wyślij e-mail testowy",
           "save": "Zapisz i zamknij"
         }
       },
       "utilities_menu": {
         "title": "Encje i stawki",
+        "description": "Dodane encje:\n{summary}",
         "menu_options": {
           "utility_add_energy": "Dodaj z Energy Dashboard",
           "utility_add": "Dodaj ręcznie (własna stawka)",
-          "utility_remove": "Usuń encję",
+          "utility_remove": "Usuń encje",
           "init": "Wstecz"
         }
       },
@@ -66,16 +72,18 @@
         }
       },
       "utility_remove": {
-        "title": "Usuń encję",
+        "title": "Usuń encje",
+        "description": "Zaznacz pozycje, które chcesz usunąć.",
         "data": {
-          "index": "Wybierz pozycję do usunięcia"
+          "indices": "Pozycje do usunięcia"
         }
       },
       "fixed_costs_menu": {
         "title": "Stałe koszty",
+        "description": "Dodane koszty stałe:\n{summary}",
         "menu_options": {
           "fixed_add": "Dodaj koszt",
-          "fixed_remove": "Usuń koszt",
+          "fixed_remove": "Usuń koszty",
           "init": "Wstecz"
         }
       },
@@ -88,10 +96,15 @@
         }
       },
       "fixed_remove": {
-        "title": "Usuń koszt stały",
+        "title": "Usuń koszty stałe",
+        "description": "Zaznacz pozycje, które chcesz usunąć.",
         "data": {
-          "index": "Wybierz pozycję do usunięcia"
+          "indices": "Pozycje do usunięcia"
         }
+      },
+      "send_test": {
+        "title": "Wyślij e-mail testowy",
+        "description": "Wiadomość testowa zostanie wysłana na adresy: {recipients}. Temat będzie miał prefiks [TEST]. Kliknij Wyślij, aby potwierdzić."
       },
       "recipients": {
         "title": "Odbiorcy raportu",

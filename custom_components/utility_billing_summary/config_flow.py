@@ -132,6 +132,13 @@ class UtilityBillOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        utilities = self._working.get(OPT_UTILITIES, [])
+        fixed = self._working.get(OPT_FIXED_COSTS, [])
+        recipients = self._working.get(OPT_RECIPIENTS, [])
+        summary = (
+            f"Encje: {len(utilities)} · Koszty stałe: {len(fixed)} · "
+            f"Odbiorcy: {len(recipients)}"
+        )
         return self.async_show_menu(
             step_id="init",
             menu_options=[
@@ -140,9 +147,46 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 "recipients",
                 "smtp",
                 "preferences",
+                "send_test",
                 "save",
             ],
+            description_placeholders={"summary": summary},
         )
+
+    # ------------------------------------------------------------------ helpers
+    @staticmethod
+    def _utility_label(row: dict[str, Any]) -> str:
+        src = row.get(UTIL_SOURCE, SOURCE_MANUAL)
+        mark = "🔌" if src == SOURCE_ENERGY else "✏️"
+        name = row.get(UTIL_NAME, "?")
+        cat = row.get(UTIL_CATEGORY, "")
+        unit = row.get(UTIL_UNIT, "")
+        if src == SOURCE_ENERGY:
+            return f"{mark} {name} — {cat} (Energy Dashboard)"
+        rate = row.get(UTIL_RATE, 0)
+        return f"{mark} {name} — {cat} ({rate}/{unit})"
+
+    @staticmethod
+    def _fixed_label(row: dict[str, Any]) -> str:
+        name = row.get(COST_NAME, "?")
+        amount = row.get(COST_AMOUNT, 0)
+        mode = row.get(COST_BILLING_MODE, DEFAULT_BILLING_MODE)
+        mode_label = "z góry" if mode == "prepaid" else "z dołu"
+        return f"{name} — {amount} ({mode_label})"
+
+    def _utilities_summary(self) -> str:
+        rows = self._working.get(OPT_UTILITIES, [])
+        if not rows:
+            return "Brak dodanych encji."
+        return "\n".join(
+            f"{i}. {self._utility_label(r)}" for i, r in enumerate(rows, 1)
+        )
+
+    def _fixed_summary(self) -> str:
+        rows = self._working.get(OPT_FIXED_COSTS, [])
+        if not rows:
+            return "Brak dodanych kosztów stałych."
+        return "\n".join(f"{i}. {self._fixed_label(r)}" for i, r in enumerate(rows, 1))
 
     # ------------------------------------------------------------------ utilities
     async def async_step_utilities_menu(
@@ -156,6 +200,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 "utility_remove",
                 "init",
             ],
+            description_placeholders={"summary": self._utilities_summary()},
         )
 
     async def async_step_utility_add(
@@ -260,25 +305,30 @@ class UtilityBillOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         utilities: list[dict[str, Any]] = list(self._working.get(OPT_UTILITIES, []))
         if not utilities:
-            return await self.async_step_init()
+            return await self.async_step_utilities_menu()
 
-        labels = {
-            str(i): f"{u.get(UTIL_NAME)} ({u.get(UTIL_ENTITY_ID)})"
-            for i, u in enumerate(utilities)
-        }
         if user_input is not None:
-            idx = int(user_input["index"])
-            if 0 <= idx < len(utilities):
-                utilities.pop(idx)
-                self._working[OPT_UTILITIES] = utilities
-            return await self.async_step_init()
+            indices = sorted(
+                {int(v) for v in user_input.get("indices", [])},
+                reverse=True,
+            )
+            for idx in indices:
+                if 0 <= idx < len(utilities):
+                    utilities.pop(idx)
+            self._working[OPT_UTILITIES] = utilities
+            return await self.async_step_utilities_menu()
 
+        options = [
+            {"value": str(i), "label": self._utility_label(u)}
+            for i, u in enumerate(utilities)
+        ]
         schema = vol.Schema(
             {
-                vol.Required("index"): SelectSelector(
+                vol.Required("indices", default=[]): SelectSelector(
                     SelectSelectorConfig(
-                        options=[{"value": k, "label": v} for k, v in labels.items()],
-                        mode=SelectSelectorMode.DROPDOWN,
+                        options=options,
+                        mode=SelectSelectorMode.LIST,
+                        multiple=True,
                     )
                 )
             }
@@ -292,6 +342,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
         return self.async_show_menu(
             step_id="fixed_costs_menu",
             menu_options=["fixed_add", "fixed_remove", "init"],
+            description_placeholders={"summary": self._fixed_summary()},
         )
 
     async def async_step_fixed_add(
@@ -333,25 +384,30 @@ class UtilityBillOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         costs: list[dict[str, Any]] = list(self._working.get(OPT_FIXED_COSTS, []))
         if not costs:
-            return await self.async_step_init()
+            return await self.async_step_fixed_costs_menu()
 
-        labels = {
-            str(i): f"{c.get(COST_NAME)} ({c.get(COST_AMOUNT)})"
-            for i, c in enumerate(costs)
-        }
         if user_input is not None:
-            idx = int(user_input["index"])
-            if 0 <= idx < len(costs):
-                costs.pop(idx)
-                self._working[OPT_FIXED_COSTS] = costs
-            return await self.async_step_init()
+            indices = sorted(
+                {int(v) for v in user_input.get("indices", [])},
+                reverse=True,
+            )
+            for idx in indices:
+                if 0 <= idx < len(costs):
+                    costs.pop(idx)
+            self._working[OPT_FIXED_COSTS] = costs
+            return await self.async_step_fixed_costs_menu()
 
+        options = [
+            {"value": str(i), "label": self._fixed_label(c)}
+            for i, c in enumerate(costs)
+        ]
         schema = vol.Schema(
             {
-                vol.Required("index"): SelectSelector(
+                vol.Required("indices", default=[]): SelectSelector(
                     SelectSelectorConfig(
-                        options=[{"value": k, "label": v} for k, v in labels.items()],
-                        mode=SelectSelectorMode.DROPDOWN,
+                        options=options,
+                        mode=SelectSelectorMode.LIST,
+                        multiple=True,
                     )
                 )
             }
@@ -405,6 +461,32 @@ class UtilityBillOptionsFlow(OptionsFlow):
             }
         )
         return self.async_show_form(step_id="preferences", data_schema=schema)
+
+    async def async_step_send_test(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Trigger the `send_test_email` service from the options flow."""
+        recipients = self._working.get(OPT_RECIPIENTS, [])
+        if not recipients:
+            return self.async_abort(reason="no_recipients")
+
+        if user_input is not None:
+            try:
+                await self.hass.services.async_call(
+                    DOMAIN,
+                    "send_test_email",
+                    {"recipients": recipients},
+                    blocking=True,
+                )
+            except Exception:  # noqa: BLE001
+                return self.async_abort(reason="send_failed")
+            return self.async_abort(reason="test_sent")
+
+        return self.async_show_form(
+            step_id="send_test",
+            data_schema=vol.Schema({}),
+            description_placeholders={"recipients": ", ".join(recipients)},
+        )
 
     async def async_step_save(
         self, user_input: dict[str, Any] | None = None

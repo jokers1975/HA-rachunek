@@ -22,26 +22,32 @@
   },
   "options": {
     "abort": {
-      "no_energy_sources": "No priced sources in the Energy Dashboard. Configure electricity/gas/water there first, then come back."
+      "no_energy_sources": "No priced sources in the Energy Dashboard. Configure electricity/gas/water there first, then come back.",
+      "no_recipients": "No recipients configured. Add addresses under \"Report recipients\" and try again.",
+      "test_sent": "Test email sent.",
+      "send_failed": "Failed to send the test email. Check Home Assistant logs and SMTP settings."
     },
     "step": {
       "init": {
         "title": "Utility Bill Summary",
+        "description": "Configuration state: {summary}",
         "menu_options": {
           "utilities_menu": "Utilities & tariffs",
           "fixed_costs_menu": "Fixed monthly costs",
           "recipients": "Report recipients",
           "smtp": "SMTP settings",
           "preferences": "Preferences",
+          "send_test": "Send test email",
           "save": "Save and close"
         }
       },
       "utilities_menu": {
         "title": "Utilities & tariffs",
+        "description": "Configured utilities:\n{summary}",
         "menu_options": {
           "utility_add_energy": "Add from Energy Dashboard",
           "utility_add": "Add manually (custom rate)",
-          "utility_remove": "Remove utility",
+          "utility_remove": "Remove utilities",
           "init": "Back"
         }
       },
@@ -66,14 +72,16 @@
         }
       },
       "utility_remove": {
-        "title": "Remove utility",
-        "data": {"index": "Choose the row to remove"}
+        "title": "Remove utilities",
+        "description": "Select the rows you want to remove.",
+        "data": {"indices": "Rows to remove"}
       },
       "fixed_costs_menu": {
         "title": "Fixed costs",
+        "description": "Configured fixed costs:\n{summary}",
         "menu_options": {
           "fixed_add": "Add cost",
-          "fixed_remove": "Remove cost",
+          "fixed_remove": "Remove costs",
           "init": "Back"
         }
       },
@@ -86,8 +94,13 @@
         }
       },
       "fixed_remove": {
-        "title": "Remove fixed cost",
-        "data": {"index": "Choose the row to remove"}
+        "title": "Remove fixed costs",
+        "description": "Select the rows you want to remove.",
+        "data": {"indices": "Rows to remove"}
+      },
+      "send_test": {
+        "title": "Send test email",
+        "description": "A test email will be sent to: {recipients}. The subject will be prefixed with [TEST]. Click Submit to confirm."
       },
       "recipients": {
         "title": "Report recipients",
