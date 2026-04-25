@@ -1,4 +1,5 @@
 """Utility Bill Summary integration setup."""
+
 from __future__ import annotations
 
 import logging
@@ -126,7 +127,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
             entry = hass.config_entries.async_get_entry(entry_id)
             if entry is None:
                 continue
-            await _async_run_monthly_job(hass, entry, month=month, recipients=recipients)
+            await _async_run_monthly_job(
+                hass, entry, month=month, recipients=recipients
+            )
 
     async def _generate_preview(call: ServiceCall) -> dict[str, Any]:
         month = _parse_month(call.data.get("month"))

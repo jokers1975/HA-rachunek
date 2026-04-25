@@ -1,4 +1,5 @@
 """Render utility summary as HTML and deliver via async SMTP."""
+
 from __future__ import annotations
 
 import logging
@@ -23,8 +24,18 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 _PL_MONTHS = [
-    "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
-    "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
+    "styczeń",
+    "luty",
+    "marzec",
+    "kwiecień",
+    "maj",
+    "czerwiec",
+    "lipiec",
+    "sierpień",
+    "wrzesień",
+    "październik",
+    "listopad",
+    "grudzień",
 ]
 
 

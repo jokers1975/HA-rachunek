@@ -1,4 +1,5 @@
 """Data coordinator aggregating utility costs per month and year."""
+
 from __future__ import annotations
 
 import logging

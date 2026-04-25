@@ -1,4 +1,5 @@
 """Config and options flow for Utility Bill Summary."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -65,15 +66,15 @@ def _smtp_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_SMTP_PORT, default=d.get(CONF_SMTP_PORT, DEFAULT_SMTP_PORT)
             ): int,
             vol.Required(CONF_SMTP_USER, default=d.get(CONF_SMTP_USER, "")): str,
-            vol.Required(CONF_SMTP_PASSWORD, default=d.get(CONF_SMTP_PASSWORD, "")): TextSelector(
-                TextSelectorConfig(type=TextSelectorType.PASSWORD)
-            ),
+            vol.Required(
+                CONF_SMTP_PASSWORD, default=d.get(CONF_SMTP_PASSWORD, "")
+            ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
             vol.Required(
                 CONF_SMTP_TLS, default=d.get(CONF_SMTP_TLS, DEFAULT_SMTP_TLS)
             ): bool,
-            vol.Required(CONF_SMTP_SENDER, default=d.get(CONF_SMTP_SENDER, "")): TextSelector(
-                TextSelectorConfig(type=TextSelectorType.EMAIL)
-            ),
+            vol.Required(
+                CONF_SMTP_SENDER, default=d.get(CONF_SMTP_SENDER, "")
+            ): TextSelector(TextSelectorConfig(type=TextSelectorType.EMAIL)),
         }
     )
 
@@ -204,9 +205,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
             {
                 vol.Required("index"): SelectSelector(
                     SelectSelectorConfig(
-                        options=[
-                            {"value": k, "label": v} for k, v in labels.items()
-                        ],
+                        options=[{"value": k, "label": v} for k, v in labels.items()],
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 )
@@ -241,9 +240,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
             {
                 vol.Required(COST_NAME): str,
                 vol.Required(COST_AMOUNT, default=0.0): NumberSelector(
-                    NumberSelectorConfig(
-                        min=0, step=0.01, mode=NumberSelectorMode.BOX
-                    )
+                    NumberSelectorConfig(min=0, step=0.01, mode=NumberSelectorMode.BOX)
                 ),
             }
         )
@@ -271,9 +268,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
             {
                 vol.Required("index"): SelectSelector(
                     SelectSelectorConfig(
-                        options=[
-                            {"value": k, "label": v} for k, v in labels.items()
-                        ],
+                        options=[{"value": k, "label": v} for k, v in labels.items()],
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 )
@@ -292,9 +287,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 part.strip() for part in raw.split(",") if part.strip()
             ]
             return await self.async_step_init()
-        schema = vol.Schema(
-            {vol.Required("recipients", default=current): str}
-        )
+        schema = vol.Schema({vol.Required("recipients", default=current): str})
         return self.async_show_form(step_id="recipients", data_schema=schema)
 
     async def async_step_smtp(

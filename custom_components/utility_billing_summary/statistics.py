@@ -1,8 +1,9 @@
 """Monthly consumption source with statistics-first, state-fallback strategy."""
+
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Any
 
 from homeassistant.components.recorder import get_instance
@@ -11,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, STORAGE_KEY_PREFIX, STORAGE_VERSION
+from .const import STORAGE_KEY_PREFIX, STORAGE_VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -108,9 +109,7 @@ async def _try_state_fallback(
     return max(delta, 0.0)
 
 
-async def async_reset_snapshot(
-    hass: HomeAssistant, entry_id: str, month: date
-) -> None:
+async def async_reset_snapshot(hass: HomeAssistant, entry_id: str, month: date) -> None:
     """Clear the fallback baseline for a new month."""
     store: Store[dict[str, dict[str, float]]] = Store(
         hass,

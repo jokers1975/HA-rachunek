@@ -1,4 +1,5 @@
 """Constants for the Utility Bill Summary integration."""
+
 from __future__ import annotations
 
 from homeassistant.const import Platform

@@ -1,4 +1,5 @@
 """Sensor entities exposing monthly and yearly cost aggregates."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -9,7 +10,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -23,7 +24,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Create cost sensors based on configured utilities."""
-    coordinator: UtilityBillCoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator: UtilityBillCoordinator = hass.data[DOMAIN][entry.entry_id][
+        "coordinator"
+    ]
 
     entities: list[SensorEntity] = [
         MonthTotalSensor(coordinator, entry),
