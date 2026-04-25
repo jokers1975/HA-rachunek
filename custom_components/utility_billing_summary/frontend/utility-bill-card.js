@@ -5,7 +5,7 @@
  * a 12-month bar chart.
  */
 
-const CARD_VERSION = "0.3.0";
+const CARD_VERSION = "0.3.2";
 
 const CATEGORY_ICONS = {
   electricity: "⚡",
@@ -119,13 +119,10 @@ class UtilityBillCard extends HTMLElement {
       const rateCell = hasRate
         ? `${Number(line.rate).toFixed(4)} ${currency}`
         : `—`;
-      const sourceMark = line.source === "energy"
-        ? `<span class="src" title="Z Energy Dashboard">🔌</span>`
-        : "";
       return `
         <tr>
           <td>
-            <div class="name"><span class="cat">${icon}</span>${line.name || ""}${sourceMark}</div>
+            <div class="name"><span class="cat">${icon}</span>${line.name || ""}</div>
             <div class="period">okres: ${fmtPeriodRange(line.period_start, line.period_end)}</div>
           </td>
           <td class="num">${cons} ${line.unit || ""}</td>

@@ -24,6 +24,15 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+_CATEGORY_ICONS = {
+    "electricity": "⚡",
+    "gas": "🔥",
+    "water": "💧",
+    "heating": "♨️",
+    "other": "",
+}
+
+
 _PL_MONTHS = [
     "styczeń",
     "luty",
@@ -112,7 +121,7 @@ def render_report_html(report: dict[str, Any]) -> str:
     comparison = report.get("comparison")
     report_number = datetime.strptime(
         report.get("month", date.today().isoformat())[:10], "%Y-%m-%d"
-    ).strftime("%Y%m")
+    ).strftime("%m/%Y")
 
     def _rate_cell(line: dict[str, Any]) -> str:
         rate = line.get("rate")
@@ -120,14 +129,15 @@ def render_report_html(report: dict[str, Any]) -> str:
             return "—"
         return _fmt_money(float(rate), currency)
 
-    def _source_mark(line: dict[str, Any]) -> str:
-        return " 🔌" if line.get("source") == "energy" else ""
+    def _category_mark(line: dict[str, Any]) -> str:
+        icon = _CATEGORY_ICONS.get(line.get("category", "other"), "")
+        return f" {icon}" if icon else ""
 
     lines_html = "".join(
         f"""
         <tr>
           <td>
-            <div class="name">{escape(str(line.get("name", "")))}{_source_mark(line)}</div>
+            <div class="name">{_category_mark(line)} {escape(str(line.get("name", "")))}</div>
             <div class="period">okres: {escape(_fmt_period_range(line.get("period_start", ""), line.get("period_end", "")))}</div>
           </td>
           <td class="num">{line.get("consumption", 0):.2f} {escape(str(line.get("unit", "")))}</td>
@@ -217,7 +227,7 @@ def render_report_html(report: dict[str, Any]) -> str:
       <div class="period">Okres rozliczenia: {escape(period_label)}</div>
     </div>
     <div class="meta">
-      Numer<br><span class="num">UBS/{report_number}</span>
+      Numer<br><span class="num">{report_number}</span>
     </div>
   </header>
   <table>

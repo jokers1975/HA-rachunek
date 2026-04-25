@@ -47,6 +47,7 @@
         "menu_options": {
           "utility_add_energy": "Dodaj z Energy Dashboard",
           "utility_add": "Dodaj ręcznie (własna stawka)",
+          "utility_edit_select": "Edytuj encję",
           "utility_remove": "Usuń encje",
           "init": "Wstecz"
         }
@@ -71,9 +72,27 @@
           "unit": "Jednostka"
         }
       },
+      "utility_edit_select": {
+        "title": "Edytuj encję",
+        "description": "Wybierz pozycję do edycji:\n{summary}",
+        "data": {
+          "index": "Pozycja"
+        }
+      },
+      "utility_edit": {
+        "title": "Edytuj encję",
+        "description": "Edytujesz: {label}",
+        "data": {
+          "entity_id": "Czujnik zużycia",
+          "name": "Nazwa",
+          "rate": "Stawka za jednostkę",
+          "unit": "Jednostka",
+          "category": "Kategoria"
+        }
+      },
       "utility_remove": {
         "title": "Usuń encje",
-        "description": "Zaznacz pozycje, które chcesz usunąć.",
+        "description": "Zaznacz pozycje, które chcesz usunąć.\n{summary}",
         "data": {
           "indices": "Pozycje do usunięcia"
         }
@@ -83,6 +102,7 @@
         "description": "Dodane koszty stałe:\n{summary}",
         "menu_options": {
           "fixed_add": "Dodaj koszt",
+          "fixed_edit_select": "Edytuj koszt",
           "fixed_remove": "Usuń koszty",
           "init": "Wstecz"
         }
@@ -95,9 +115,25 @@
           "billing_mode": "Tryb rozliczenia"
         }
       },
+      "fixed_edit_select": {
+        "title": "Edytuj koszt stały",
+        "description": "Wybierz pozycję do edycji:\n{summary}",
+        "data": {
+          "index": "Pozycja"
+        }
+      },
+      "fixed_edit": {
+        "title": "Edytuj koszt stały",
+        "description": "Edytujesz: {label}",
+        "data": {
+          "name": "Nazwa",
+          "amount": "Kwota miesięczna",
+          "billing_mode": "Tryb rozliczenia"
+        }
+      },
       "fixed_remove": {
         "title": "Usuń koszty stałe",
-        "description": "Zaznacz pozycje, które chcesz usunąć.",
+        "description": "Zaznacz pozycje, które chcesz usunąć.\n{summary}",
         "data": {
           "indices": "Pozycje do usunięcia"
         }
@@ -108,9 +144,9 @@
       },
       "recipients": {
         "title": "Odbiorcy raportu",
-        "description": "Adresy oddzielone przecinkami.",
+        "description": "Aktualni odbiorcy:\n{summary}\n\nWpisz nowy adres i wciśnij Enter, aby dodać. Kliknij X przy chipie, aby usunąć.",
         "data": {
-          "recipients": "Lista e-mail"
+          "recipients": "Adresy e-mail"
         }
       },
       "smtp": {

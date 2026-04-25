@@ -47,6 +47,7 @@
         "menu_options": {
           "utility_add_energy": "Add from Energy Dashboard",
           "utility_add": "Add manually (custom rate)",
+          "utility_edit_select": "Edit utility",
           "utility_remove": "Remove utilities",
           "init": "Back"
         }
@@ -71,9 +72,25 @@
           "unit": "Unit"
         }
       },
+      "utility_edit_select": {
+        "title": "Edit utility",
+        "description": "Pick the row to edit:\n{summary}",
+        "data": {"index": "Row"}
+      },
+      "utility_edit": {
+        "title": "Edit utility",
+        "description": "Editing: {label}",
+        "data": {
+          "entity_id": "Consumption sensor",
+          "name": "Name",
+          "rate": "Rate per unit",
+          "unit": "Unit",
+          "category": "Category"
+        }
+      },
       "utility_remove": {
         "title": "Remove utilities",
-        "description": "Select the rows you want to remove.",
+        "description": "Select the rows you want to remove.\n{summary}",
         "data": {"indices": "Rows to remove"}
       },
       "fixed_costs_menu": {
@@ -81,6 +98,7 @@
         "description": "Configured fixed costs:\n{summary}",
         "menu_options": {
           "fixed_add": "Add cost",
+          "fixed_edit_select": "Edit cost",
           "fixed_remove": "Remove costs",
           "init": "Back"
         }
@@ -93,9 +111,23 @@
           "billing_mode": "Billing mode"
         }
       },
+      "fixed_edit_select": {
+        "title": "Edit fixed cost",
+        "description": "Pick the row to edit:\n{summary}",
+        "data": {"index": "Row"}
+      },
+      "fixed_edit": {
+        "title": "Edit fixed cost",
+        "description": "Editing: {label}",
+        "data": {
+          "name": "Name",
+          "amount": "Monthly amount",
+          "billing_mode": "Billing mode"
+        }
+      },
       "fixed_remove": {
         "title": "Remove fixed costs",
-        "description": "Select the rows you want to remove.",
+        "description": "Select the rows you want to remove.\n{summary}",
         "data": {"indices": "Rows to remove"}
       },
       "send_test": {
@@ -104,8 +136,8 @@
       },
       "recipients": {
         "title": "Report recipients",
-        "description": "Comma-separated addresses.",
-        "data": {"recipients": "Email list"}
+        "description": "Current recipients:\n{summary}\n\nType an address and press Enter to add. Click the X on a chip to remove.",
+        "data": {"recipients": "Email addresses"}
       },
       "smtp": {
         "title": "SMTP settings",
