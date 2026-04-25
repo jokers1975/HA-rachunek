@@ -17,6 +17,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     CARD_FILENAME,
+    CARD_SUBDIR,
     CARD_URL_PATH,
     DEFAULT_AUTO_SEND,
     DOMAIN,
@@ -28,6 +29,7 @@ from .const import (
     REPORT_MINUTE,
     SERVICE_GENERATE_PREVIEW,
     SERVICE_SEND_MONTHLY_REPORT,
+    SERVICE_SEND_TEST_EMAIL,
 )
 from .coordinator import UtilityBillCoordinator
 from .email_report import async_send_report, render_report_html
@@ -47,6 +49,12 @@ SERVICE_PREVIEW_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_TEST_SCHEMA = vol.Schema(
+    {
+        vol.Optional("recipients"): vol.All(list, [str]),
+    }
+)
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up a config entry."""
@@ -60,7 +68,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await _async_register_frontend_card(hass)
     _async_register_services(hass)
 
-    # Built-in monthly scheduler — fires daily at 09:00, guarded by day == 1.
     async def _scheduled_check(now):
         if now.day != REPORT_DAY:
             return
@@ -83,8 +90,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry_data = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if entry_data and (unsub := entry_data.get("unsub_schedule")):
         unsub()
-    if not hass.data.get(DOMAIN):
-        for service in (SERVICE_SEND_MONTHLY_REPORT, SERVICE_GENERATE_PREVIEW):
+    if not any(k for k in hass.data.get(DOMAIN, {}) if not k.startswith("_")):
+        for service in (
+            SERVICE_SEND_MONTHLY_REPORT,
+            SERVICE_GENERATE_PREVIEW,
+            SERVICE_SEND_TEST_EMAIL,
+        ):
             if hass.services.has_service(DOMAIN, service):
                 hass.services.async_remove(DOMAIN, service)
     return unload_ok
@@ -96,13 +107,11 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
 
 
 async def _async_register_frontend_card(hass: HomeAssistant) -> None:
-    """Serve the custom Lovelace card and register it as an extra module."""
+    """Serve the bundled Lovelace card and register it as an extra module."""
     if hass.data[DOMAIN].get("_card_registered"):
         return
-    # www/ lives at the repo root; manifest directory is custom_components/<domain>/
     component_dir = os.path.dirname(__file__)
-    repo_root = os.path.abspath(os.path.join(component_dir, "..", ".."))
-    card_path = os.path.join(repo_root, "www", CARD_FILENAME)
+    card_path = os.path.join(component_dir, CARD_SUBDIR, CARD_FILENAME)
     if not os.path.exists(card_path):
         _LOGGER.warning("Card file not found at %s", card_path)
         return
@@ -113,6 +122,15 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
     hass.data[DOMAIN]["_card_registered"] = True
 
 
+def _iter_entries(hass: HomeAssistant):
+    for entry_id, bundle in hass.data.get(DOMAIN, {}).items():
+        if entry_id.startswith("_"):
+            continue
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is not None:
+            yield entry, bundle
+
+
 def _async_register_services(hass: HomeAssistant) -> None:
     """Register integration services once."""
     if hass.services.has_service(DOMAIN, SERVICE_SEND_MONTHLY_REPORT):
@@ -121,26 +139,34 @@ def _async_register_services(hass: HomeAssistant) -> None:
     async def _send_report(call: ServiceCall) -> None:
         month = _parse_month(call.data.get("month"))
         recipients = call.data.get("recipients")
-        for entry_id in list(hass.data.get(DOMAIN, {}).keys()):
-            if entry_id.startswith("_"):
-                continue
-            entry = hass.config_entries.async_get_entry(entry_id)
-            if entry is None:
-                continue
+        for entry, _bundle in _iter_entries(hass):
             await _async_run_monthly_job(
                 hass, entry, month=month, recipients=recipients
             )
 
     async def _generate_preview(call: ServiceCall) -> dict[str, Any]:
         month = _parse_month(call.data.get("month"))
-        for entry_id, bundle in hass.data.get(DOMAIN, {}).items():
-            if entry_id.startswith("_"):
-                continue
+        for entry, bundle in _iter_entries(hass):
             coordinator: UtilityBillCoordinator = bundle["coordinator"]
             target = month or _previous_month(dt_util.now().date())
             report = await coordinator.async_generate_report(target)
             return {"html": render_report_html(report), "report": report}
         return {"html": "", "report": {}}
+
+    async def _send_test(call: ServiceCall) -> None:
+        """Email the current-month report with a [TEST] subject prefix."""
+        recipients = call.data.get("recipients")
+        today = dt_util.now().date()
+        current_month = today.replace(day=1)
+        for entry, bundle in _iter_entries(hass):
+            coordinator: UtilityBillCoordinator = bundle["coordinator"]
+            report = await coordinator.async_generate_report(current_month)
+            report["is_test"] = True
+            to = recipients or entry.options.get(OPT_RECIPIENTS, [])
+            if not to:
+                _LOGGER.warning("No recipients configured; skipping test email")
+                continue
+            await async_send_report(hass, entry, report, to)
 
     hass.services.async_register(
         DOMAIN, SERVICE_SEND_MONTHLY_REPORT, _send_report, schema=SERVICE_SEND_SCHEMA
@@ -151,6 +177,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
         _generate_preview,
         schema=SERVICE_PREVIEW_SCHEMA,
         supports_response=True,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_SEND_TEST_EMAIL, _send_test, schema=SERVICE_TEST_SCHEMA
     )
 
 

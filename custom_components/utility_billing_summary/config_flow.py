@@ -27,6 +27,7 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
+    BILLING_MODES,
     CATEGORIES,
     CATEGORY_OTHER,
     CONF_SMTP_HOST,
@@ -37,8 +38,10 @@ from .const import (
     CONF_SMTP_USER,
     CONF_TITLE,
     COST_AMOUNT,
+    COST_BILLING_MODE,
     COST_NAME,
     DEFAULT_AUTO_SEND,
+    DEFAULT_BILLING_MODE,
     DEFAULT_CURRENCY,
     DEFAULT_SMTP_PORT,
     DEFAULT_SMTP_TLS,
@@ -231,6 +234,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 {
                     COST_NAME: user_input[COST_NAME],
                     COST_AMOUNT: float(user_input[COST_AMOUNT]),
+                    COST_BILLING_MODE: user_input[COST_BILLING_MODE],
                 }
             )
             self._working[OPT_FIXED_COSTS] = costs
@@ -241,6 +245,15 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 vol.Required(COST_NAME): str,
                 vol.Required(COST_AMOUNT, default=0.0): NumberSelector(
                     NumberSelectorConfig(min=0, step=0.01, mode=NumberSelectorMode.BOX)
+                ),
+                vol.Required(
+                    COST_BILLING_MODE, default=DEFAULT_BILLING_MODE
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=BILLING_MODES,
+                        mode=SelectSelectorMode.DROPDOWN,
+                        translation_key="billing_mode",
+                    )
                 ),
             }
         )

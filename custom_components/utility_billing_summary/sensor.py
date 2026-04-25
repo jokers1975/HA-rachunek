@@ -74,7 +74,11 @@ class MonthTotalSensor(_BaseBillSensor):
             "month": data.month.isoformat(),
             "currency": data.currency,
             "breakdown": [line.__dict__ for line in data.month_lines],
-            "fixed_costs": data.month_fixed,
+            "fixed_costs": [f.__dict__ for f in data.month_fixed],
+            "history": data.history,
+            "last_month": data.last_month.isoformat() if data.last_month else None,
+            "last_month_total": data.last_month_total,
+            "year_total": data.year_total,
         }
 
 
@@ -99,8 +103,6 @@ class LastMonthTotalSensor(_BaseBillSensor):
         return {
             "month": data.last_month.isoformat(),
             "currency": data.currency,
-            "breakdown": [line.__dict__ for line in data.last_month_lines],
-            "fixed_costs": data.last_month_fixed,
         }
 
 
@@ -162,5 +164,7 @@ class UtilityCostSensor(_BaseBillSensor):
                     "rate": line.rate,
                     "category": line.category,
                     "source_entity": line.entity_id,
+                    "period_start": line.period_start,
+                    "period_end": line.period_end,
                 }
         return {}

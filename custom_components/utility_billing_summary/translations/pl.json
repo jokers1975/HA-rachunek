@@ -69,7 +69,8 @@
         "title": "Dodaj koszt stały",
         "data": {
           "name": "Nazwa (np. abonament internet)",
-          "amount": "Kwota miesięczna"
+          "amount": "Kwota miesięczna",
+          "billing_mode": "Tryb rozliczenia"
         }
       },
       "fixed_remove": {
@@ -115,6 +116,12 @@
         "heating": "Ogrzewanie",
         "other": "Inne"
       }
+    },
+    "billing_mode": {
+      "options": {
+        "postpaid": "Z dołu (za bieżący miesiąc)",
+        "prepaid": "Z góry (za kolejny miesiąc)"
+      }
     }
   },
   "entity": {
@@ -152,6 +159,16 @@
         "month": {
           "name": "Miesiąc",
           "description": "Miesiąc w formacie YYYY-MM."
+        }
+      }
+    },
+    "send_test_email": {
+      "name": "Wyślij e-mail testowy",
+      "description": "Wysyła raport za bieżący miesiąc z prefiksem [TEST] w tytule.",
+      "fields": {
+        "recipients": {
+          "name": "Odbiorcy",
+          "description": "Opcjonalna lista adresów — domyślnie używani są odbiorcy z konfiguracji."
         }
       }
     }

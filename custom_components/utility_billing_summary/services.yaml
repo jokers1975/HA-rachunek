@@ -28,3 +28,15 @@ generate_preview:
       example: "2026-03"
       selector:
         text:
+
+send_test_email:
+  name: Wyślij e-mail testowy
+  description: Wysyła raport za bieżący miesiąc z prefiksem [TEST] w tytule — do weryfikacji konfiguracji SMTP i szablonu.
+  fields:
+    recipients:
+      name: Odbiorcy
+      description: Opcjonalna lista adresów — domyślnie używani są odbiorcy z konfiguracji.
+      required: false
+      example: "['ty@example.com']"
+      selector:
+        object:

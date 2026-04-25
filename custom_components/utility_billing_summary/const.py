@@ -33,12 +33,20 @@ UTIL_CATEGORY = "category"
 # Per-fixed-cost row keys
 COST_NAME = "name"
 COST_AMOUNT = "amount"
+COST_BILLING_MODE = "billing_mode"
+
+# Billing modes for fixed costs
+BILLING_PREPAID = "prepaid"   # paid in advance — period labelled with the NEXT month
+BILLING_POSTPAID = "postpaid"  # paid in arrears — labelled with the report month
+BILLING_MODES = [BILLING_POSTPAID, BILLING_PREPAID]
 
 # Defaults
 DEFAULT_CURRENCY = "PLN"
 DEFAULT_SMTP_PORT = 587
 DEFAULT_SMTP_TLS = True
 DEFAULT_AUTO_SEND = True
+DEFAULT_BILLING_MODE = BILLING_POSTPAID
+HISTORY_MONTHS = 12
 UPDATE_INTERVAL_HOURS = 1
 
 # Scheduler — report generated on the 1st day at 09:00 local
@@ -67,7 +75,9 @@ CATEGORIES = [
 # Service names
 SERVICE_SEND_MONTHLY_REPORT = "send_monthly_report"
 SERVICE_GENERATE_PREVIEW = "generate_preview"
+SERVICE_SEND_TEST_EMAIL = "send_test_email"
 
-# Frontend
-CARD_URL_PATH = f"/{DOMAIN}/utility-card.js"
-CARD_FILENAME = "utility-card.js"
+# Frontend — card is bundled inside the integration so HACS ships it along the code
+CARD_URL_PATH = f"/{DOMAIN}/utility-bill-card.js"
+CARD_FILENAME = "utility-bill-card.js"
+CARD_SUBDIR = "frontend"

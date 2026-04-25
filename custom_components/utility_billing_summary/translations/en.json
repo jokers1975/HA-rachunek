@@ -65,7 +65,11 @@
       },
       "fixed_add": {
         "title": "Add fixed cost",
-        "data": {"name": "Name", "amount": "Monthly amount"}
+        "data": {
+          "name": "Name",
+          "amount": "Monthly amount",
+          "billing_mode": "Billing mode"
+        }
       },
       "fixed_remove": {
         "title": "Remove fixed cost",
@@ -106,6 +110,12 @@
         "heating": "Heating",
         "other": "Other"
       }
+    },
+    "billing_mode": {
+      "options": {
+        "postpaid": "Postpaid (for current month)",
+        "prepaid": "Prepaid (for next month)"
+      }
     }
   },
   "entity": {
@@ -129,6 +139,16 @@
       "description": "Returns the report HTML without sending.",
       "fields": {
         "month": {"name": "Month", "description": "Month as YYYY-MM."}
+      }
+    },
+    "send_test_email": {
+      "name": "Send test email",
+      "description": "Sends the current-month report with [TEST] in the subject.",
+      "fields": {
+        "recipients": {
+          "name": "Recipients",
+          "description": "Optional list of email addresses — defaults to configured recipients."
+        }
       }
     }
   }
