@@ -260,7 +260,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                         min=0, step=0.0001, mode=NumberSelectorMode.BOX
                     )
                 ),
-                vol.Required(UTIL_UNIT, default="kWh"): TextSelector(TextSelectorConfig()),
+                vol.Required(UTIL_UNIT, default="kWh"): TextSelector(
+                    TextSelectorConfig()
+                ),
                 vol.Required(UTIL_CATEGORY, default=CATEGORY_OTHER): SelectSelector(
                     SelectSelectorConfig(
                         options=CATEGORIES,
@@ -389,9 +391,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                     vol.Required(
                         UTIL_ENTITY_ID, default=row.get(UTIL_ENTITY_ID, "")
                     ): EntitySelector(EntitySelectorConfig(domain="sensor")),
-                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): TextSelector(
-                        TextSelectorConfig()
-                    ),
+                    vol.Required(
+                        UTIL_NAME, default=row.get(UTIL_NAME, "")
+                    ): TextSelector(TextSelectorConfig()),
                     vol.Required(
                         UTIL_RATE, default=float(row.get(UTIL_RATE, 0.0))
                     ): NumberSelector(
@@ -417,9 +419,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
         else:  # SOURCE_ENERGY — stat_* fields are read-only, only label/metadata edit
             schema = vol.Schema(
                 {
-                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): TextSelector(
-                        TextSelectorConfig()
-                    ),
+                    vol.Required(
+                        UTIL_NAME, default=row.get(UTIL_NAME, "")
+                    ): TextSelector(TextSelectorConfig()),
                     vol.Required(
                         UTIL_CATEGORY,
                         default=row.get(UTIL_CATEGORY, CATEGORY_OTHER),
@@ -727,7 +729,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                     OPT_PAYMENT_DUE_DAYS,
                     default=self._working.get(OPT_PAYMENT_DUE_DAYS) or 0,
                 ): NumberSelector(
-                    NumberSelectorConfig(min=0, max=90, step=1, mode=NumberSelectorMode.BOX)
+                    NumberSelectorConfig(
+                        min=0, max=90, step=1, mode=NumberSelectorMode.BOX
+                    )
                 ),
                 vol.Optional(
                     OPT_BANK_ACCOUNT,

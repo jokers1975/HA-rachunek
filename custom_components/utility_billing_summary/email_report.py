@@ -134,9 +134,9 @@ def render_report_html(report: dict[str, Any]) -> str:
                 next_first = date(bm.year + 1, 1, 1)
             else:
                 next_first = date(bm.year, bm.month + 1, 1)
-            due_date_str = (next_first + timedelta(days=int(payment_due_days))).strftime(
-                "%d.%m.%Y"
-            )
+            due_date_str = (
+                next_first + timedelta(days=int(payment_due_days))
+            ).strftime("%d.%m.%Y")
         except (ValueError, TypeError):
             pass
 
