@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import calendar
 from datetime import date, datetime, timedelta
 from email.message import EmailMessage
 from html import escape
