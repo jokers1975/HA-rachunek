@@ -390,7 +390,11 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 {
                     vol.Required(
                         UTIL_ENTITY_ID, default=row.get(UTIL_ENTITY_ID, "")
-                    ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                    ): EntitySelector(
+                        EntitySelectorConfig(
+                            filter=EntityFilterSelectorConfig(domain=["sensor"])
+                        )
+                    ),
                     vol.Required(
                         UTIL_NAME, default=row.get(UTIL_NAME, "")
                     ): TextSelector(TextSelectorConfig()),
