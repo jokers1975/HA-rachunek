@@ -13,6 +13,7 @@ from homeassistant.config_entries import (
 )
 from homeassistant.core import callback
 from homeassistant.helpers.selector import (
+    EntityFilterSelectorConfig,
     EntitySelector,
     EntitySelectorConfig,
     NumberSelector,
@@ -249,7 +250,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Required(UTIL_ENTITY_ID): EntitySelector(
-                    EntitySelectorConfig(domain="sensor")
+                    EntitySelectorConfig(
+                        filter=EntityFilterSelectorConfig(domain=["sensor"])
+                    )
                 ),
                 vol.Required(UTIL_NAME): TextSelector(TextSelectorConfig()),
                 vol.Required(UTIL_RATE, default=0.0): NumberSelector(
