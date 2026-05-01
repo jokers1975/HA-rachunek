@@ -165,7 +165,10 @@
         "title": "Preferencje",
         "data": {
           "currency": "Waluta",
-          "auto_send": "Automatyczna wysyłka 1. dnia miesiąca o 09:00"
+          "auto_send": "Automatyczna wysyłka 1. dnia miesiąca o 09:00",
+          "property_name": "Nazwa nieruchomości (opcjonalnie)",
+          "payment_due_days": "Termin płatności (dni od 1. następnego miesiąca, 0 = brak)",
+          "bank_account": "Numer konta bankowego (opcjonalnie)"
         }
       }
     }

@@ -5,7 +5,7 @@
  * a 12-month bar chart.
  */
 
-const CARD_VERSION = "0.3.2";
+const CARD_VERSION = "0.4.0";
 
 const CATEGORY_ICONS = {
   electricity: "⚡",
@@ -18,6 +18,10 @@ const CATEGORY_ICONS = {
 const PL_MONTHS = [
   "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
   "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
+];
+const PL_MONTHS_GEN = [
+  "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
+  "lipca", "sierpnia", "września", "października", "listopada", "grudnia",
 ];
 const PL_MONTHS_SHORT = [
   "sty", "lut", "mar", "kwi", "maj", "cze",
@@ -43,9 +47,9 @@ function fmtPeriodRange(startIso, endIso) {
   const [sy, sm, sd] = startIso.split("-").map(Number);
   const [ey, em, ed] = endIso.split("-").map(Number);
   if (sm === em && sy === ey) {
-    return `od ${sd} do ${ed} ${PL_MONTHS[sm - 1]} ${sy}`;
+    return `od ${sd} do ${ed} ${PL_MONTHS_GEN[sm - 1]} ${sy}`;
   }
-  return `od ${sd} ${PL_MONTHS[sm - 1]} ${sy} do ${ed} ${PL_MONTHS[em - 1]} ${ey}`;
+  return `od ${sd} ${PL_MONTHS_GEN[sm - 1]} ${sy} do ${ed} ${PL_MONTHS_GEN[em - 1]} ${ey}`;
 }
 
 function fmtCostPeriod(cost) {
@@ -111,6 +115,17 @@ class UtilityBillCard extends HTMLElement {
     const selectedLabel = fmtMonth(`${this._selectedMonth}-01`);
     const yearTotal = Number(attrs.year_total || 0);
     const title = this._config.title || "Rachunek za media";
+
+    const propertyName = attrs.property_name || "";
+    const bankAccount = attrs.bank_account || "";
+    const paymentDueDays = attrs.payment_due_days;
+    let dueDateStr = "";
+    if (paymentDueDays && Number(paymentDueDays) > 0 && currentIsoMonth) {
+      const [yr, mo] = currentIsoMonth.split("-").map(Number);
+      const nextFirst = mo === 12 ? new Date(yr + 1, 0, 1) : new Date(yr, mo, 1);
+      const due = new Date(nextFirst.getTime() + Number(paymentDueDays) * 86400000);
+      dueDateStr = due.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    }
 
     const lineRows = (viewData.lines || []).map((line) => {
       const icon = CATEGORY_ICONS[line.category] || CATEGORY_ICONS.other;
@@ -193,6 +208,10 @@ class UtilityBillCard extends HTMLElement {
           .comparison.spent { border-left-color: #b55; background: rgba(181,85,85,0.08); }
           .comparison .cmp-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
             color: var(--secondary-text-color, #6a5a2a); font-weight: 600; margin-bottom: 2px; }
+          .property { font-size: 11px; color: var(--secondary-text-color, #6a5a2a); margin-bottom: 4px; }
+          .due-date { font-size: 11px; color: var(--secondary-text-color, #6a5a2a); margin-top: 6px; }
+          .bank { margin-top: 14px; padding: 8px 10px; border-radius: 4px; font-size: 11px;
+            background: rgba(106,90,42,0.06); color: var(--secondary-text-color, #6a5a2a); }
           .chart-box { margin-top: 18px; }
           .chart-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
             color: var(--secondary-text-color, #6a5a2a); margin-bottom: 6px; }
@@ -206,8 +225,14 @@ class UtilityBillCard extends HTMLElement {
         </style>
         <div class="wrap">
           <div class="topbar">
-            <h2>${title}</h2>
-            <div class="year">Razem w ${currentIsoMonth.slice(0, 4)}: <span class="num">${fmtMoney(yearTotal, currency)}</span></div>
+            <div>
+              <h2>${title}</h2>
+              ${propertyName ? `<div class="property">${propertyName}</div>` : ""}
+            </div>
+            <div style="text-align:right;">
+              <div class="year">Razem w ${currentIsoMonth.slice(0, 4)}: <span class="num">${fmtMoney(yearTotal, currency)}</span></div>
+              ${dueDateStr ? `<div class="due-date">Termin: <strong>${dueDateStr}</strong></div>` : ""}
+            </div>
           </div>
           <div class="nav">
             <button data-act="prev" ${canPrev ? "" : "disabled"} title="Poprzedni miesiąc">◀</button>
@@ -223,6 +248,7 @@ class UtilityBillCard extends HTMLElement {
           </table>
           <div class="total"><span class="label">Razem do zapłaty</span><span>${fmtMoney(viewData.total, currency)}</span></div>
           ${comparisonBlock}
+          ${bankAccount ? `<div class="bank">Nr konta: <strong>${bankAccount}</strong></div>` : ""}
           <div class="chart-box">
             <div class="chart-title">Ostatnie 12 miesięcy</div>
             ${chartSvg}

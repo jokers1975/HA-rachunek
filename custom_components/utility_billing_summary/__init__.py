@@ -84,7 +84,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def _on_energy_prefs_changed() -> None:
         await coordinator.async_request_refresh()
 
-    await async_register_prefs_listener(hass, _on_energy_prefs_changed)
+    unsub_energy = await async_register_prefs_listener(hass, _on_energy_prefs_changed)
+    if unsub_energy:
+        hass.data[DOMAIN][entry.entry_id]["unsub_energy"] = unsub_energy
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
@@ -93,9 +95,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    entry_data = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
-    if entry_data and (unsub := entry_data.get("unsub_schedule")):
-        unsub()
+    if unload_ok:
+        entry_data = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+        if entry_data:
+            if unsub := entry_data.get("unsub_schedule"):
+                unsub()
+            if unsub_energy := entry_data.get("unsub_energy"):
+                unsub_energy()
     if not any(k for k in hass.data.get(DOMAIN, {}) if not k.startswith("_")):
         for service in (
             SERVICE_SEND_MONTHLY_REPORT,

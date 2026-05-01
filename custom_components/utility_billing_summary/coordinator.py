@@ -23,8 +23,11 @@ from .const import (
     DEFAULT_CURRENCY,
     DOMAIN,
     HISTORY_MONTHS,
+    OPT_BANK_ACCOUNT,
     OPT_CURRENCY,
     OPT_FIXED_COSTS,
+    OPT_PAYMENT_DUE_DAYS,
+    OPT_PROPERTY_NAME,
     OPT_UTILITIES,
     SOURCE_ENERGY,
     SOURCE_MANUAL,
@@ -82,6 +85,9 @@ class BillData:
     last_month_total: float = 0.0
     year_total: float = 0.0
     history: list[dict[str, Any]] = field(default_factory=list)
+    property_name: str = ""
+    payment_due_days: int | None = None
+    bank_account: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -94,6 +100,9 @@ class BillData:
             "last_month_total": self.last_month_total,
             "year_total": self.year_total,
             "history": self.history,
+            "property_name": self.property_name,
+            "payment_due_days": self.payment_due_days,
+            "bank_account": self.bank_account,
         }
 
 
@@ -161,6 +170,9 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
             for entry in data.history
             if entry["month"].startswith(f"{current_month.year}-")
         )
+        data.property_name = self.entry.options.get(OPT_PROPERTY_NAME, "")
+        data.payment_due_days = self.entry.options.get(OPT_PAYMENT_DUE_DAYS)
+        data.bank_account = self.entry.options.get(OPT_BANK_ACCOUNT, "")
         return data
 
     def _sum_all(self, lines: list[UtilityLine], fixed: list[FixedCost]) -> float:
@@ -315,4 +327,7 @@ class UtilityBillCoordinator(DataUpdateCoordinator[BillData]):
             "fixed_costs": [f.__dict__ for f in fixed],
             "total": total,
             "comparison": comparison,
+            "property_name": self.entry.options.get(OPT_PROPERTY_NAME, ""),
+            "payment_due_days": self.entry.options.get(OPT_PAYMENT_DUE_DAYS),
+            "bank_account": self.entry.options.get(OPT_BANK_ACCOUNT, ""),
         }

@@ -1,7 +1,7 @@
 {
   "domain": "utility_billing_summary",
   "name": "Utility Bill Summary",
-  "after_dependencies": [],
+  "after_dependencies": ["energy"],
   "codeowners": ["@jokers1975"],
   "config_flow": true,
   "dependencies": ["http", "frontend", "recorder"],
@@ -10,5 +10,5 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/jokers1975/HA-rachunek/issues",
   "requirements": ["aiosmtplib>=3.0.1"],
-  "version": "0.3.2"
+  "version": "0.4.0"
 }

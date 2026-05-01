@@ -79,6 +79,9 @@ class MonthTotalSensor(_BaseBillSensor):
             "last_month": data.last_month.isoformat() if data.last_month else None,
             "last_month_total": data.last_month_total,
             "year_total": data.year_total,
+            "property_name": data.property_name,
+            "payment_due_days": data.payment_due_days,
+            "bank_account": data.bank_account,
         }
 
 

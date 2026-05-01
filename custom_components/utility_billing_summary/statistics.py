@@ -88,6 +88,24 @@ async def _try_state_fallback(
     )
     data = await store.async_load() or {}
     month_key = month.strftime("%Y-%m")
+    snapshot = data.get(month_key, {})
+
+    if entity_id in snapshot:
+        baseline = snapshot[entity_id]
+        state = hass.states.get(entity_id)
+        if state is None:
+            return None
+        try:
+            current = float(state.state)
+        except (TypeError, ValueError):
+            return None
+        return max(current - baseline, 0.0)
+
+    # No snapshot for this month/entity.
+    current_month = dt_util.now().date().replace(day=1)
+    if month < current_month:
+        # Historical month without a recorded baseline — no data, avoid spurious write.
+        return None
 
     state = hass.states.get(entity_id)
     if state is None:
@@ -97,16 +115,10 @@ async def _try_state_fallback(
     except (TypeError, ValueError):
         return None
 
-    snapshot = data.setdefault(month_key, {})
-    if entity_id not in snapshot:
-        # First observation — record baseline, return 0 for this cycle.
-        snapshot[entity_id] = current
-        await store.async_save(data)
-        return 0.0
-
-    baseline = snapshot[entity_id]
-    delta = current - baseline
-    return max(delta, 0.0)
+    snapshot[entity_id] = current
+    data[month_key] = snapshot
+    await store.async_save(data)
+    return 0.0
 
 
 async def async_monthly_stat_change(

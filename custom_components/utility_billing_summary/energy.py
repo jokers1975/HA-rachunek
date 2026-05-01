@@ -103,20 +103,23 @@ def _friendly_name(hass: HomeAssistant, entity_id: str) -> str:
 
 async def async_register_prefs_listener(
     hass: HomeAssistant, callback: Callable[[], Awaitable[None]]
-) -> None:
-    """Register a callback that fires whenever Energy Dashboard prefs are saved."""
+) -> Callable[[], None] | None:
+    """Register a callback that fires whenever Energy Dashboard prefs are saved.
+
+    Returns an unsubscribe callable, or None when Energy is unavailable.
+    """
     try:
         from homeassistant.components.energy import async_get_manager
     except ImportError:
-        return
+        return None
 
     try:
         manager = await async_get_manager(hass)
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Cannot attach energy prefs listener: %s", err)
-        return
+        return None
 
     listen = getattr(manager, "async_listen_updates", None)
     if listen is None:
-        return
-    listen(callback)
+        return None
+    return listen(callback)

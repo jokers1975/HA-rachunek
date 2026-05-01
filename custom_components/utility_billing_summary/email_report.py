@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+import calendar
+from datetime import date, datetime, timedelta
 from email.message import EmailMessage
 from html import escape
 from typing import Any, Iterable
@@ -47,19 +48,19 @@ _PL_MONTHS = [
     "listopad",
     "grudzień",
 ]
-_PL_MONTHS_GEN = [  # "za styczeń"
-    "styczeń",
-    "luty",
-    "marzec",
-    "kwiecień",
-    "maj",
-    "czerwiec",
-    "lipiec",
-    "sierpień",
-    "wrzesień",
-    "październik",
-    "listopad",
-    "grudzień",
+_PL_MONTHS_GEN = [  # genitive — "od 1 do 30 kwietnia"
+    "stycznia",
+    "lutego",
+    "marca",
+    "kwietnia",
+    "maja",
+    "czerwca",
+    "lipca",
+    "sierpnia",
+    "września",
+    "października",
+    "listopada",
+    "grudnia",
 ]
 
 
@@ -119,15 +120,34 @@ def render_report_html(report: dict[str, Any]) -> str:
     period_label = _fmt_iso_month(report.get("month", date.today().isoformat()))
     is_test = bool(report.get("is_test"))
     comparison = report.get("comparison")
-    report_number = datetime.strptime(
-        report.get("month", date.today().isoformat())[:10], "%Y-%m-%d"
-    ).strftime("%m/%Y")
+    property_name = str(report.get("property_name") or "")
+    bank_account = str(report.get("bank_account") or "")
+    payment_due_days = report.get("payment_due_days")
+
+    month_str = report.get("month", date.today().isoformat())[:7]
+    report_number = datetime.strptime(month_str, "%Y-%m").strftime("%m/%Y")
+
+    due_date_str = ""
+    if payment_due_days and int(payment_due_days) > 0:
+        try:
+            bm = datetime.strptime(month_str, "%Y-%m")
+            if bm.month == 12:
+                next_first = date(bm.year + 1, 1, 1)
+            else:
+                next_first = date(bm.year, bm.month + 1, 1)
+            due_date_str = (next_first + timedelta(days=int(payment_due_days))).strftime(
+                "%d.%m.%Y"
+            )
+        except (ValueError, TypeError):
+            pass
 
     def _rate_cell(line: dict[str, Any]) -> str:
         rate = line.get("rate")
         if rate is None:
             return "—"
-        return _fmt_money(float(rate), currency)
+        unit = escape(str(line.get("unit", "")))
+        suffix = f"/{unit}" if unit else ""
+        return f"{_fmt_money(float(rate), currency)}{suffix}"
 
     def _category_mark(line: dict[str, Any]) -> str:
         icon = _CATEGORY_ICONS.get(line.get("category", "other"), "")
@@ -188,6 +208,19 @@ def render_report_html(report: dict[str, Any]) -> str:
         """
 
     badge = '<span class="badge">TEST</span>' if is_test else ""
+    property_html = (
+        f'<div class="property">{escape(property_name)}</div>' if property_name else ""
+    )
+    due_html = (
+        f'<br>Termin płatności<br><span class="num">{due_date_str}</span>'
+        if due_date_str
+        else ""
+    )
+    bank_html = (
+        f'<div class="bank">Nr konta: <strong>{escape(bank_account)}</strong></div>'
+        if bank_account
+        else ""
+    )
 
     return f"""<!doctype html>
 <html lang="pl"><head><meta charset="utf-8"><title>Rachunek {escape(period_label)}</title>
@@ -198,6 +231,7 @@ def render_report_html(report: dict[str, Any]) -> str:
   header {{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }}
   h1 {{ font-size: 22px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 4px; }}
   .period {{ color: #6a5a2a; font-size: 13px; }}
+  .property {{ color: #6a5a2a; font-size: 12px; margin-top: 2px; }}
   .meta {{ text-align: right; font-size: 12px; color: #6a5a2a; }}
   .meta .num {{ font-size: 14px; color: #222; font-weight: 600; }}
   .badge {{ display: inline-block; background: #b22; color: #fff; padding: 2px 8px; border-radius: 3px;
@@ -218,6 +252,8 @@ def render_report_html(report: dict[str, Any]) -> str:
   .comparison.spent {{ border-left-color: #b55; background: #fbe9e5; }}
   .comparison .cmp-title {{ font-weight: 600; font-size: 11px; letter-spacing: 1px;
     text-transform: uppercase; margin-bottom: 4px; }}
+  .bank {{ margin-top: 18px; padding: 10px 14px; background: #f5eed6; border-radius: 4px;
+    font-size: 12px; color: #6a5a2a; }}
   .footer {{ margin-top: 22px; font-size: 11px; color: #8a7f55; text-align: center; }}
 </style></head>
 <body><div class="invoice">
@@ -225,9 +261,10 @@ def render_report_html(report: dict[str, Any]) -> str:
     <div>
       <h1>Rachunek za media {badge}</h1>
       <div class="period">Okres rozliczenia: {escape(period_label)}</div>
+      {property_html}
     </div>
     <div class="meta">
-      Numer<br><span class="num">{report_number}</span>
+      Numer<br><span class="num">{report_number}</span>{due_html}
     </div>
   </header>
   <table>
@@ -238,6 +275,7 @@ def render_report_html(report: dict[str, Any]) -> str:
   </table>
   <div class="total"><span class="label">Razem do zapłaty</span><span>{_fmt_money(total, currency)}</span></div>
   {comparison_html}
+  {bank_html}
   <div class="footer">Wygenerowano przez Utility Bill Summary · Home Assistant</div>
 </div></body></html>"""
 

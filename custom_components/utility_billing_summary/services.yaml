@@ -8,7 +8,8 @@ send_monthly_report:
       required: false
       example: "['biuro@example.com']"
       selector:
-        object:
+        text:
+          multiple: true
     month:
       name: Miesiąc
       description: Miesiąc w formacie YYYY-MM. Domyślnie — poprzedni pełny miesiąc.
@@ -39,4 +40,5 @@ send_test_email:
       required: false
       example: "['ty@example.com']"
       selector:
-        object:
+        text:
+          multiple: true

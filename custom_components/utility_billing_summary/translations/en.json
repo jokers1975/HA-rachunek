@@ -155,7 +155,10 @@
         "title": "Preferences",
         "data": {
           "currency": "Currency",
-          "auto_send": "Auto-send on the 1st at 09:00"
+          "auto_send": "Auto-send on the 1st at 09:00",
+          "property_name": "Property name (optional)",
+          "payment_due_days": "Payment due (days from 1st of next month, 0 = none)",
+          "bank_account": "Bank account number (optional)"
         }
       }
     }

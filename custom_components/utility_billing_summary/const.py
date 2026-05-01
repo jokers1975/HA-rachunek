@@ -22,6 +22,9 @@ OPT_FIXED_COSTS = "fixed_costs"
 OPT_RECIPIENTS = "recipients"
 OPT_CURRENCY = "currency"
 OPT_AUTO_SEND = "auto_send"
+OPT_PROPERTY_NAME = "property_name"
+OPT_PAYMENT_DUE_DAYS = "payment_due_days"
+OPT_BANK_ACCOUNT = "bank_account"
 
 # Per-utility row keys
 UTIL_ENTITY_ID = "entity_id"

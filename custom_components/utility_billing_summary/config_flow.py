@@ -47,8 +47,11 @@ from .const import (
     DEFAULT_SMTP_TLS,
     DOMAIN,
     OPT_AUTO_SEND,
+    OPT_BANK_ACCOUNT,
     OPT_CURRENCY,
     OPT_FIXED_COSTS,
+    OPT_PAYMENT_DUE_DAYS,
+    OPT_PROPERTY_NAME,
     OPT_RECIPIENTS,
     OPT_UTILITIES,
     SOURCE_ENERGY,
@@ -248,13 +251,13 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 vol.Required(UTIL_ENTITY_ID): EntitySelector(
                     EntitySelectorConfig(domain="sensor")
                 ),
-                vol.Required(UTIL_NAME): str,
+                vol.Required(UTIL_NAME): TextSelector(TextSelectorConfig()),
                 vol.Required(UTIL_RATE, default=0.0): NumberSelector(
                     NumberSelectorConfig(
                         min=0, step=0.0001, mode=NumberSelectorMode.BOX
                     )
                 ),
-                vol.Required(UTIL_UNIT, default="kWh"): str,
+                vol.Required(UTIL_UNIT, default="kWh"): TextSelector(TextSelectorConfig()),
                 vol.Required(UTIL_CATEGORY, default=CATEGORY_OTHER): SelectSelector(
                     SelectSelectorConfig(
                         options=CATEGORIES,
@@ -383,7 +386,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                     vol.Required(
                         UTIL_ENTITY_ID, default=row.get(UTIL_ENTITY_ID, "")
                     ): EntitySelector(EntitySelectorConfig(domain="sensor")),
-                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): str,
+                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): TextSelector(
+                        TextSelectorConfig()
+                    ),
                     vol.Required(
                         UTIL_RATE, default=float(row.get(UTIL_RATE, 0.0))
                     ): NumberSelector(
@@ -391,7 +396,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                             min=0, step=0.0001, mode=NumberSelectorMode.BOX
                         )
                     ),
-                    vol.Required(UTIL_UNIT, default=row.get(UTIL_UNIT, "kWh")): str,
+                    vol.Required(
+                        UTIL_UNIT, default=row.get(UTIL_UNIT, "kWh")
+                    ): TextSelector(TextSelectorConfig()),
                     vol.Required(
                         UTIL_CATEGORY,
                         default=row.get(UTIL_CATEGORY, CATEGORY_OTHER),
@@ -407,7 +414,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
         else:  # SOURCE_ENERGY — stat_* fields are read-only, only label/metadata edit
             schema = vol.Schema(
                 {
-                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): str,
+                    vol.Required(UTIL_NAME, default=row.get(UTIL_NAME, "")): TextSelector(
+                        TextSelectorConfig()
+                    ),
                     vol.Required(
                         UTIL_CATEGORY,
                         default=row.get(UTIL_CATEGORY, CATEGORY_OTHER),
@@ -418,7 +427,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
                             translation_key="utility_category",
                         )
                     ),
-                    vol.Required(UTIL_UNIT, default=row.get(UTIL_UNIT, "kWh")): str,
+                    vol.Required(
+                        UTIL_UNIT, default=row.get(UTIL_UNIT, "kWh")
+                    ): TextSelector(TextSelectorConfig()),
                 }
             )
         return self.async_show_form(
@@ -498,7 +509,7 @@ class UtilityBillOptionsFlow(OptionsFlow):
 
         schema = vol.Schema(
             {
-                vol.Required(COST_NAME): str,
+                vol.Required(COST_NAME): TextSelector(TextSelectorConfig()),
                 vol.Required(COST_AMOUNT, default=0.0): NumberSelector(
                     NumberSelectorConfig(min=0, step=0.01, mode=NumberSelectorMode.BOX)
                 ),
@@ -567,7 +578,9 @@ class UtilityBillOptionsFlow(OptionsFlow):
 
         schema = vol.Schema(
             {
-                vol.Required(COST_NAME, default=row.get(COST_NAME, "")): str,
+                vol.Required(COST_NAME, default=row.get(COST_NAME, "")): TextSelector(
+                    TextSelectorConfig()
+                ),
                 vol.Required(
                     COST_AMOUNT, default=float(row.get(COST_AMOUNT, 0.0))
                 ): NumberSelector(
@@ -685,6 +698,12 @@ class UtilityBillOptionsFlow(OptionsFlow):
         if user_input is not None:
             self._working[OPT_CURRENCY] = user_input[OPT_CURRENCY]
             self._working[OPT_AUTO_SEND] = user_input[OPT_AUTO_SEND]
+            self._working[OPT_PROPERTY_NAME] = user_input.get(OPT_PROPERTY_NAME, "")
+            due_days = user_input.get(OPT_PAYMENT_DUE_DAYS)
+            self._working[OPT_PAYMENT_DUE_DAYS] = (
+                int(due_days) if due_days is not None and int(due_days) > 0 else None
+            )
+            self._working[OPT_BANK_ACCOUNT] = user_input.get(OPT_BANK_ACCOUNT, "")
             self._save_working()
             return await self.async_step_init()
         schema = vol.Schema(
@@ -692,11 +711,25 @@ class UtilityBillOptionsFlow(OptionsFlow):
                 vol.Required(
                     OPT_CURRENCY,
                     default=self._working.get(OPT_CURRENCY, DEFAULT_CURRENCY),
-                ): str,
+                ): TextSelector(TextSelectorConfig()),
                 vol.Required(
                     OPT_AUTO_SEND,
                     default=self._working.get(OPT_AUTO_SEND, DEFAULT_AUTO_SEND),
                 ): bool,
+                vol.Optional(
+                    OPT_PROPERTY_NAME,
+                    default=self._working.get(OPT_PROPERTY_NAME, ""),
+                ): TextSelector(TextSelectorConfig()),
+                vol.Optional(
+                    OPT_PAYMENT_DUE_DAYS,
+                    default=self._working.get(OPT_PAYMENT_DUE_DAYS) or 0,
+                ): NumberSelector(
+                    NumberSelectorConfig(min=0, max=90, step=1, mode=NumberSelectorMode.BOX)
+                ),
+                vol.Optional(
+                    OPT_BANK_ACCOUNT,
+                    default=self._working.get(OPT_BANK_ACCOUNT, ""),
+                ): TextSelector(TextSelectorConfig()),
             }
         )
         return self.async_show_form(step_id="preferences", data_schema=schema)
